@@ -111,6 +111,7 @@ This paper validates the parameter identification through additional experiments
 
 
 \section{Technical Approach}
+\label{sec-tech}
 The problem of optimal parameter identification of a flexible object through multiple experiments has three primary technical challenges:
 \begin{enumerate}
 \item the object's model,
@@ -163,10 +164,24 @@ The details and analysis of each step in the algorithm, as well as the confidenc
 
 
 \section{Results}
-\textbf{still need to write}
+For a single experiment, we have optimally identified the stiffness properties of a flexible loop using Rethink Robotics Baxter robot, as outlined in Section \ref{sec-exps}.  We used steepest descent to numerically calculate the optimal parameters.  The stiffness was given by the spring constants $\rho = [\kappa_\theta,\kappa_\psi]^T$ which both must be greater than zero.   At each iteration of the descent, an Armijo line search updates the parameters by choosing a distance to step in the direction of the negative gradient.  We used Armijo parameters $\alpha = \beta = 0.4$ \cite{armijo}.
+
+We seeded the steepest descent algorithm with an initial guess of $\rho = [5, 5]^T$.  After $75$ iterations, the algorithm terminated with gradient norm $|DJ_d(\rho)| = 0.001138$.  The cost decreased from $J_d = 2.13506$ to $1.106741$.  The parameters were identified as $\rho^\star = [4.45252, 0.96969]^T$.  The convergence is shown in Fig.~\ref{fig-conv} and appears to have linear convergence which must be the case for steepest descent.
+
+\begin{wrapfigure}{r}{0.5\textwidth}
+\centering
+\includegraphics[width = 0.47\textwidth]{conv_12_links.pdf}
+\caption{Convergence of steepest descent.}
+\label{fig-conv}
+\end{wrapfigure}
+
+For the example, optimally identifying a 12-link  (31 configuration, 62 state) model from 20 seconds of manipulation activity (2000 data points recorded at 100Hz) takes 219.05 minutes on a Macbook air.  For comparison, we also identified a 6-link (19 configuration 38 state) model.  It converged nearly four times quicker, in 61.01 minutes, but the optimal cost was higher at $J_d = 1.54588$.  The design tradeoff is between model fidelity and computation time.
+
+In the full paper we will extend these results to multiple experiments as discussed in Section \ref{sec-tech}
 
 
 \section{Experiments}
+\label{sec-exps}
 \begin{figure*}
 \centering
 \def\svgwidth{.9\textwidth}
@@ -182,7 +197,9 @@ The details and analysis of each step in the algorithm, as well as the confidenc
 \end{wrapfigure}
 The experiment is set up as follows.  We use Rethink Robotics' Baxter robot \cite{guizzo2011rethink}, shown in Figure~\ref{fig-baxter_image_1}, to manipulate and measure an inflated rubber loop (bicycle tyre). Baxter's arm is positioned similarly to that in Figure~\ref{fig-baxter_image_1}.  The top of the loop is placed in Baxter's gripper and the bottom is clamped to the table.   The loop is initially positioned vertically. The loop has a radius of $0.355$ meters and a mass of $0.132$ kilograms.  The arm is run through a recorded motion that is designed to stretch, bend, and twist the tube. The arm's joint angles and torques are captured and recorded every 100Hz.  The measured joint angles have a position resolution of +/- 5 mm.  The process of ``playing'' a recorded motion and recording the joint angles and torques constitutes a single experiment.
 
-Images of baxter manipulating the loop compared to the simulated system is shown in Figure~\ref{fig-3bloops}.  For this simulation, the loop is composed of 12 links.  The simulation is dependent on the stiffness values of the loop.  The identification goal is to find the stiffness properties which coorespond to a simulation that best matches the measured data.  The results of optimally identifying the loop's stiffness parameters for a single experiment are shown in Figure~\ref{fig-paths}.  The figure compares the measured end effector path with the simulated end effector path for each iteration of a steepest descent.  We extend this result in the full paper to multiple parameters.
+In order to improve the identification, multiple experiments are conducted.  These experiments may include manipulating the loop with two arms instead of one or use the second arm to "probe" whether the tube is where the model estimates it should be.  This estimate will worsen the greater the loop is twisted or bent, but the amount it will be off will depend on the quality of the identification.
+
+Images of baxter manipulating the loop compared to the simulated system is shown in Figure~\ref{fig-3bloops}.  For this simulation, the loop is composed of 12 links.  The simulation is dependent on the stiffness values of the loop.  The identification goal is to find the stiffness properties which correspond to a simulation that best matches the measured data.  The results of optimally identifying the loop's stiffness parameters for a single experiment are shown in Figure~\ref{fig-paths}.  The figure compares the measured end effector path with the simulated end effector path for each iteration of a steepest descent.  We extend this result in the full paper to multiple parameters.
 
 
 
